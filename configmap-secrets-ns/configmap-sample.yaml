@@ -1,0 +1,18 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: plantext-configmap-sample
+data:
+  payment_service_name: "api.paymentservice.co"
+  user_management_service: "api.usermanagement.co"
+
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: binary-configmap-sample
+binaryData:
+  payment_service_name: "YXBpLnBheW1lbnRzZXJ2aWNlLmNvCg=="
+  user_management_service: "YXBpLnVzZXJtYW5hZ2VtZW50LmNvCg=="

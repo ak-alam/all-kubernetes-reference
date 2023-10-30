@@ -1,0 +1,32 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-clusterIP-example
+spec:
+  selector:
+
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-clusterIP-deployment
+spec:
+  replicas: 2
+  selectors:
+  template:
+    metadata:
+      labels:
+        tier: nginx-webserver
+    spec:
+      containers:
+       - name: nginx-clusterIP
+         image: nginx:latest
+         ports:
+            - containerPort: 80
+    

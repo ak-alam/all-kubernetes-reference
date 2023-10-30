@@ -1,0 +1,33 @@
+# application.yaml
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sample-config
+data:
+  backend_service: "api.backend.com"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+spec:
+  containers:
+    - name: web
+      image: nginx:latest
+      ports:
+        - containerPort: 80
+      env:
+        - name: "backend_service"
+          valueFrom:
+            configMapKeyRef:
+              name: sample-config
+              key: backend_service
+
+      resources:
+        limits:
+          cpu: "1"
+          memory: "512Mi"
+        requests:
+          cpu: "0.5"
+          memory: "256Mi"
