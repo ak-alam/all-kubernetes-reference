@@ -92,3 +92,47 @@ metadata:
   uid: 218a4056-155a-4836-b3c4-e083b0832a98
 type: Opaque
 ```
+
+### Encrypting using public certificate
+
+kubeseal --fetch-cert > public-key-cert.pem
+
+### Seal secret using the public-key-cert.pem file
+
+
+
+### Pulling Image From Private Dockerhub Repo
+
+* encode the file located at `~/.docker/config.json` using `cat ~/.docker/config.json | base64`
+* Create kubernetes secret kind `kubernetes.io/dockerconfigjson`
+* Reference the secret name in pod/deployment using `imagePullSecrets` property with name of the secret.
+* This will pull the image from private dockerhub repo.
+
+```yaml
+#secret.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: imagepullsecret
+  labels:
+    docker-registry: loginCreds
+data:
+  .dockerconfigjson: <encode value from ~/.docker/config.json>
+type: kubernetes.io/dockerconfigjson
+
+```
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: monitoring-app
+spec:
+  containers:
+    - name: monitoring-app
+      image: script0kid/imagepullsecrets:monitoring.v1
+      ports:
+        - containerPort: 5000
+  imagePullSecrets:
+    - name: imagepullsecret
+```
