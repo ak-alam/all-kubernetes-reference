@@ -1,0 +1,74 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongodb-secret-manager
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongo
+  template:
+    metadata:
+      labels:
+        app: mongo
+    spec:
+      serviceAccountName: aws-eks-secret-manager-sa
+      containers:
+        - image: mongo
+          name: mongo
+          args: ["--dbpath", "/data/db"]
+          env:
+            - name: MONGO_INITDB_ROOT_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: aws-sm
+                  key: mongo-username
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: aws-sm
+                  key: mongo-password
+            # - name: MONGO_INITDB_ROOT_USERNAME
+            #   value: "admin"
+            # - name: MONGO_INITDB_ROOT_PASSWORD
+            #   value: "password"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 100Mi
+            limits:
+              cpu: 200m
+              memory: 200Mi 
+          volumeMounts:
+            - name: mongodb-vol
+              mountPath: /data/db
+
+            - name: secrets-store-inline
+              mountPath: "/mnt/secrets-store"
+              readOnly: true 
+      volumes:
+        - name: mongodb-vol
+          persistentVolumeClaim:
+            claimName: mongodb-pvc
+
+        - name: secrets-store-inline
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: aws-secrets
+
+          
+---
+apiVersion: v1
+kind: Service
+metadata: 
+  name: mongo-svc-secret-manager
+spec:
+  selector:
+    app: mongo
+  ports:
+    - port: 27017
+      protocol: TCP
+  type: ClusterIP

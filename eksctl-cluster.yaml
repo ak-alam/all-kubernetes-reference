@@ -1,0 +1,26 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: dev-cluster
+  region: us-east-1
+
+vpc:
+  id: "vpc-0929a22b863c77a05"
+  cidr: "10.0.0.0/16"
+  subnets:
+    public:
+      us-east-1a: { id: subnet-045c5b54c2affa2d5 }
+      us-east-1b: { id: subnet-08d26d3b7358ce89b }
+managedNodeGroups:
+
+  - name: new-ng
+    instanceType: t3.medium
+    labels: { role: builders }
+    minSize: 1
+    maxSize: 2
+    ssh: 
+      allow: true
+      publicKeyName: akbar-us-east-1
+    tags:
+      Name: new-ng-akbar
