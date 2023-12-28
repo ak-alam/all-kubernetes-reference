@@ -1,0 +1,89 @@
+###########################################
+###########  Tomcat app         ###########
+###########################################
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tomcat-service-devops
+  namespace: tomcat-namespace-devops
+spec:
+  selector:
+    app: tomcate-server
+  type: NodePort
+  ports:
+  - port: 8080
+    targetPort: 8080
+    nodePort: 32227
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tomcat-deployment-devops
+  namespace: tomcat-namespace-devops
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tomcate-server
+  template:
+    metadata:
+      labels:
+        app: tomcate-server
+    spec:
+      containers:
+      - name: tomcat-container-devops
+        image: gcr.io/kodekloud/centos-ssh-enabled:tomcat
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 8080
+
+
+###########################################
+###########  Node app         ###########
+###########################################
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: node-app-deploy
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: node-backend-service
+  template:
+    metadata:
+      labels:
+        app: node-backend-service
+    spec:
+      containers:
+      - name: node-backend
+        image: gcr.io/kodekloud/centos-ssh-enabled:node
+        # resources:
+        #   limits:
+        #     memory: "128Mi"
+        #     cpu: "500m"
+        ports:
+        - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: node-backend-nodeport-svc
+spec:
+  selector:
+    app: node-backend-service
+  type: NodePort
+  ports:
+  - port: 8080
+    targetPort: 8080
+    nodePort: 30012
+
+
+
